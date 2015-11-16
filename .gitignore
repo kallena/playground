@@ -1,0 +1,6 @@
+/playground-api/vendor
+/playground-api/node_modules
+/playground-api/Homestead.yaml
+/playground-api/Homestead.json
+/playground-api/.env
+.DS_Store
