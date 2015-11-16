@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+	
+		<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+
+		<script type="text/javascript">
+
+			var CSRF_TOKEN = '';
+			var XSRF_TOKEN = '';
+			
+			var base_url = 'http://api.playground.local';
+
+			function getToken(){
+				$.ajax({
+				    url: base_url + '/api/token',
+				    type: 'GET',
+				    dataType: 'JSON',
+				    xhrFields: {
+      					withCredentials: true
+   					},
+				    success: function (data) {
+				        setToken(data);
+				    },
+				    error: function() {
+				    	alert('error on login');
+				    }
+				})
+			}
+
+			function setToken(data){
+				CSRF_TOKEN = data.token;
+
+				$.ajaxSetup({
+			        headers: {
+			            'X-CSRF-TOKEN': CSRF_TOKEN
+			        }
+				});
+
+				talk('X-CSRF-TOKEN has been set: ' +  CSRF_TOKEN);
+			}
+
+			function talk(data){
+				alert(data);
+			}
+
+			function logIn(){
+
+				var email = $('#email').val();
+				var password = $('#password').val();
+
+				alert(email + ' ' +  password);
+
+				$.ajax({
+				    url: base_url + '/api/auth/login',
+				    beforeSend: function (xhr) {
+				        xhr.setRequestHeader ("Authorization", "Basic " + btoa(email + ":" + password));
+				    },
+				    xhrFields: {
+      					withCredentials: true
+   					},
+				    type: 'POST',
+				    data: {_token: CSRF_TOKEN},
+				    dataType: 'JSON',
+				    success: function (data) {
+				        talk(data.message);
+				    },
+				    error: function() {
+				    	alert('error on login');
+				    }
+				});
+
+			}
+
+			function logOut(){
+
+				$.ajax({
+				    url: base_url + '/api/auth/logout',
+				    xhrFields: {
+      					withCredentials: true
+   					},
+				    type: 'POST',
+				    data: {_token: CSRF_TOKEN},
+				    dataType: 'JSON',
+				    success: function (data) {
+				        console.log(data);
+				    }
+				});
+			}
+
+			function getUser(){
+				
+				$.ajax({
+				    url: base_url + '/api/me',
+				    xhrFields: {
+      					withCredentials: true
+   					},
+				    type: 'POST',
+				    data: {_token: CSRF_TOKEN},
+				    dataType: 'JSON',
+				    success: function (data) {
+				        alert(data.message);
+				    }
+				});
+			}
+
+			$(document).ready(function() {
+
+				getToken();
+
+				$('#logIn').click(function() {
+				  logIn();
+				});
+
+				$('#showMe').click(function() {
+				  getUser();
+				});
+
+				$('#logOut').click(function() {
+				  logOut();
+				});
+
+			});
+
+		</script>
+
+
+	</head>
+	<body>
+		<h1>This is the front end!</h1>
+		<div>
+			Email:<br>
+			<input type="text" id="email" name="email" value="arron.kallenberg@gmail.com">
+			<br>
+			Last name:<br>
+			<input type="password" id="password" name="password" value="play">
+			<button id="logIn">Login</button>
+		</div>
+		<button id="showMe">Show Me</button>
+		<button id="logOut">Logout</button>
+	</body>
+</html>
